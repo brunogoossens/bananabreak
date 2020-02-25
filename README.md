@@ -4,6 +4,10 @@ This is a break reminder app build with electron. You get a notification every h
 
 ![Preview](https://raw.githubusercontent.com/brunogoossens/bananabreak/master/img/preview.png)
 
+## Dependencies
+
+- [NodeJS](https://nodejs.org/en/)
+
 ## Install
 
     $ npm install
