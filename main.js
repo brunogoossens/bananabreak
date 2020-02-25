@@ -1,8 +1,7 @@
-const { app, Menu, Tray } = require("electron");
+const { app, Menu, Tray, Notification } = require("electron");
 const moment = require("moment");
-const Notification = require("node-mac-notifier");
 const path = require("path");
-
+let notification = false;
 let appIcon = null;
 let icon = path.join(__dirname, "/img/banana-small.png");
 let contextMenu = Menu.buildFromTemplate([
@@ -18,18 +17,35 @@ app.on("ready", () => {
 });
 
 function sendNotification() {
-  const notification = new Notification("Time to bananabreak", {
+  notification = new Notification({
+    title: "Time to bananabreak",
     body: "Have a nice banana",
-    otherButtonTitle: "Stop bothering me"
+    closeButtonText: "Done",
+    timeoutType: "never",
+    actions: {
+      type: "button",
+      text: "Snooze"
+    }
   });
-  notification.addEventListener("click", () => {
-    notification.close();
+
+  notification.on("click", () => {
     nextNotification = getNextNotificationDate();
     startInterval();
   });
+  notification.on("close", () => {
+    nextNotification = getNextNotificationDate();
+    startInterval();
+  });
+  notification.on("action", data => {
+    console.log("action", data);
+    snooze();
+  });
+
+  notification.show();
 }
 
 function startInterval() {
+  clearInterval(interval);
   interval = setInterval(() => {
     if (nextNotification.isBefore(moment().subtract(5, "minutes"))) {
       // computer when to sleep for more then 5 minutes.
@@ -69,6 +85,7 @@ function rebuildMenu() {
       type: "normal",
       click: () => {
         nextNotification = getNextNotificationDate();
+        startInterval();
         rebuildMenu();
       }
     },
@@ -76,8 +93,7 @@ function rebuildMenu() {
       label: "Snooze 5 minutes",
       type: "normal",
       click: () => {
-        nextNotification = moment().add(5, "minutes");
-        rebuildMenu();
+        snooze();
       }
     },
     {
@@ -89,6 +105,15 @@ function rebuildMenu() {
     }
   ]);
   appIcon.setContextMenu(contextMenu);
+}
+
+function snooze() {
+  if (notification) {
+    notification.close();
+  }
+  nextNotification = moment().add(5, "minutes");
+  startInterval();
+  rebuildMenu();
 }
 
 function getNextNotificationDate() {

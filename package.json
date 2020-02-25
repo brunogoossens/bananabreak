@@ -5,7 +5,10 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-packager ./ BananaBreak --platform=darwin --arch=x64 --overwrite --icon=img/icon.icns"
+    "build": "npm run build-mac",
+    "build-mac": "electron-packager ./ BananaBreak --platform=darwin --arch=x64 --overwrite --icon=img/icon.icns --extend-info info.plist",
+    "build-linux": "electron-packager ./ BananaBreak --platform=linux --arch=x64 --overwrite --icon=img/icon.icns",
+    "build-windows": "electron-packager ./ BananaBreak --platform=win32 --arch=x64 --overwrite --icon=img/icon.icns"
   },
   "author": "",
   "license": "ISC",
@@ -14,10 +17,18 @@
     "electron-rebuild": "^1.10.0"
   },
   "dependencies": {
+    "electron-osx-sign": "^0.4.15",
     "electron-packager": "^14.2.1",
     "moment": "^2.24.0",
     "nan": "^2.14.0",
     "node-gyp": "^6.1.0",
     "node-mac-notifier": "^1.2.0"
+  },
+  "build": {
+    "mac": {
+      "extendInfo": {
+        "NSUserNotificationAlertStyle": "alerts"
+      }
+    }
   }
 }
